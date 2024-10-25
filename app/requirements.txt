@@ -7,3 +7,4 @@ psycopg2-binary==2.9.9
 pydantic==2.7.4
 pydantic-settings==2.3.3
 GeoAlchemy2==0.15.1
+requests==2.32.3

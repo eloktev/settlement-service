@@ -10,6 +10,7 @@ from loguru import logger
 import pandas as pd 
 from numpy import nan
 from functools import lru_cache
+import asyncio
 
 
 @lru_cache()
@@ -73,6 +74,20 @@ def model_living_area(row):
     return row
         
 
+def build_up_building_data(df: pd.DataFrame):
+    from app.schemas.living_building import LivingBuildingCreate
+    from app.dao.living_building import LivingBuildingDAO
+
+    for row in df.iterrows():
+        new_building = LivingBuildingCreate(
+            city_db_house_id=row['building_id'],
+            parent_territory_id=1,
+            center=row['geometry']
+        )
+        asyncio.run(LivingBuildingDAO.add(new_building))
+
+
+
 
 def get_restorator_data(territory_id: int, year:int):
 
@@ -87,7 +102,7 @@ def get_restorator_data(territory_id: int, year:int):
         houses_df = pd.DataFrame((entry["properties"] | {"geometry": entry["geometry"]}) for entry in get_houses(urban_territory['name'], subterritory['name'])["features"])
         houses_df = houses_df.apply(lambda row: model_living_area(row), axis=1)
         houses_df = houses_df.dropna(how="all").reset_index(drop=True).replace({nan: None})  
-        print(houses_df.shape[0])
+        # print(houses_df.shape[0])
         inner_territories.append(
             Territory(
                 name=subterritory['name'],
@@ -129,9 +144,6 @@ def get_restorator_data(territory_id: int, year:int):
     to_file(outer_territories_new_df, 'outer_territories_output.csv')
     to_file(territory.get_all_houses(), 'houses.csv')
 
-    # logger.info("Balancing city houses")
-    # balance_houses(city)
-    # to_file(city.get_all_houses(), "123.csv")
 
 
 get_restorator_data(3138, 2023)

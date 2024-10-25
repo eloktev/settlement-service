@@ -7,8 +7,8 @@ from geoalchemy2 import Geometry
 from .base import metadata, Base
 
 class Gender(enum.Enum):
-    male = 1
-    female = 2
+    male = "male"
+    female = "female"
 
 
 class LivingBuilding(Base):
